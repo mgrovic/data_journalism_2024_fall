@@ -41,3 +41,20 @@ library(tidyverse)
 print ("Hello World")
 
 ```
+
+### How to Add in R
+``` {r}
+2+2
+```
+
+### How to use variables in R
+``` {r}
+number <- 2
+```
+``` {r}
+number * number
+```
+### How to install packages in R
+```{r}
+install.packages('tidyverse')
+```
