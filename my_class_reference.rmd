@@ -58,3 +58,23 @@ number * number
 ```{r}
 install.packages('tidyverse')
 ```
+### What Obs. and Variables are in R
+Obs is short for observation, which is another way of saying rows or records. Variables is another way of saying columns or fields
+### How to preview your data in R
+```{r}
+glimpse(maryland_winred_contributions)
+```
+### How to preview your data in R (more organized)
+```{r}
+head(maryland_winred_contributions)
+```
+### How to decided what is included in your data set in R 
+Note: From what I know right now, 'group-by()' decides what category is first, summarise includes the other categories included and arrange is how you sort your data (desc=decending)
+```{r}
+maryland_winred_contributions |>
+  group_by(date) |>
+  summarise(
+    count_contribs = n()
+  ) |>
+  arrange(desc(count_contribs))
+```
