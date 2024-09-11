@@ -53,9 +53,7 @@ Columns: 24
 ```{r}
 westvirginia_winred_contributions |>
   group_by(city) |>
-   summarise(
-    count_contribs = n()
-  ) |>
+   summarise( count_contribs = n() ) |>
   arrange(desc(count_contribs))
 ```
 
@@ -68,9 +66,7 @@ Charleston (3226 contributions)
 ```{r}
 westvirginia_winred_contributions |>
   group_by(city) |>
-   summarise(
-    count_contribs = n()
-  ) |>
+   summarise(count_contribs = n()) |>
   arrange(count_contribs)
 ```
 
@@ -114,7 +110,7 @@ Store it as a variable object called `wv_summary` so that you can examine it wit
 
 ```{r}
 westvirginia_winred_contributions |>
-  group_by(memo_text) |>
+  group_by(state) |>
   summarise(
     count_contribs = n(),
     
