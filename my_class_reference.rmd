@@ -78,3 +78,46 @@ maryland_winred_contributions |>
   ) |>
   arrange(desc(count_contribs))
 ```
+### How to do math and create new columns in R
+```{r}
+ mutate( percent_election_day = election_day/votes)
+```
+### Mutate is also useful for standardizing data - for example, making different spellings of, say, cities into a single one.
+```{r}
+standardized_maryland_cities <- maryland_cities |>
+  mutate(
+    upper_city = str_to_upper(city)
+)
+```
+### How to decide the columns that you want to display
+```{r}
+primary_24 |>
+  select(office_name, office_district, candidate_name, party, county_name, election_day, votes) |>
+  mutate(
+  percent_election_day = (election_day/votes)*100
+)  |> 
+  arrange(desc(percent_election_day))
+```
+### How to decide the columns that you want to display
+```{r}
+primary_24 |>
+  select-(office_name, office_district, candidate_name, party, county_name, election_day, votes) |>
+  mutate(
+  percent_election_day = (election_day/votes)*100
+)  |> 
+  arrange(desc(percent_election_day))
+```
+### How to use `case_when` to give our new category column a value using some standard numeric logic.
+```{r}
+maryland_winred_categories <- maryland_winred_contributions |>
+  mutate(
+    amount_category = case_when(
+        amount < 100 ~ "Less than $100",
+        amount >= 100 & amount < 500 ~ "Between $100 and $499",
+        amount >= 500 & amount < 1500 ~ "Between $500 and $1499",
+        amount >= 1500 & amount < 3000 ~ "Between $500 and $2999",
+        amount >= 3000 ~ "$3,000 or more"
+      )
+  )
+head(maryland_winred_categories)
+```
