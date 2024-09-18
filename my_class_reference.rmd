@@ -121,3 +121,67 @@ maryland_winred_categories <- maryland_winred_contributions |>
   )
 head(maryland_winred_categories)
 ```
+### How to clean up the column names
+```{r}
+cleaned_conowingo <- conowingo |>
+  clean_names()
+```
+### How to remname column names
+```{r}
+cleaned_conowingo <- conowingo |>
+  clean_names() |> 
+  rename(linenumber = x1_linenumber)
+
+# display the cleaned dataset
+cleaned_conowingo
+```
+###fully clean data
+```{r}
+# cleaning function
+cleaned_conowingo <- conowingo |>
+  clean_names() |> 
+  rename(linenumber = x1_linenumber) |> 
+  mutate(amount = as.numeric(amount)) |> 
+  distinct()
+  
+
+# display the cleaned dataset
+cleaned_conowingo
+
+```
+pt 2
+```{r}
+# cleaning function
+cleaned_conowingo <- conowingo |>
+  clean_names() |> 
+  rename(linenumber = x1_linenumber) |> 
+  mutate(amount = as.numeric(amount)) |> 
+  distinct() |>
+  mutate(zip = str_sub(zip, start=1L, end=5L)) |>
+  mutate(city = str_to_title(city))
+  
+
+# display the cleaned dataset
+cleaned_conowingo
+
+```
+pt 3 
+```{r}
+# cleaning function
+cleaned_conowingo <- conowingo |>
+  clean_names() |> 
+  rename(linenumber = x1_linenumber) |> 
+  mutate(amount = as.numeric(amount)) |> 
+  distinct() |>
+  mutate(zip = str_sub(zip, start=1L, end=5L)) |>
+  mutate(city = str_to_title(city)) |>
+  mutate(city = case_when(
+    str_detect(city,"^Conowing") ~ "Conowingo",
+    TRUE ~ city
+  ))
+  
+
+# display the cleaned dataset
+cleaned_conowingo
+
+```
