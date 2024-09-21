@@ -63,6 +63,8 @@ No it doesn't
 texas_precinct_20 <- read_csv("data/tx_precinct_2020.csv", guess_max=476915)
 ```
 
+
+
 ### Task 5: Examine the data with glimpse
 
 **Task** Run the following codeblock to glimpse the data. What data type is the "district" field? What data type is the "precinct" field? What data type is the "mail" column? Answer below. 
@@ -93,7 +95,7 @@ We can fix that pretty easily, by changing that value to "49" using `case_when` 
 ```{r}
 texas_precinct_20 <- texas_precinct_20 |>
   mutate(election_day = case_when(
-    election_day == '5+' ~ '49',
+    election_day == '5+' ~ '5',
     .default = election_day
   ))
 
@@ -106,7 +108,7 @@ glimpse(texas_precinct_20)
 
 **Task** Run the following codeblock to group by mail votes, count the number of precinct results, then sort from highest to lowest on count. How many results are there where mail is NA? What's the implication there? Answer below. 
 **Answer**:
-There are 402345 NAs for mail, the large number of NA values may because  the mail-in vote data is missing for a substantial portion of the data.
+There are 402345 NAs for mail, the large number of NA values may because most people didn't mail-in vote. 
 ```{r}
 
 texas_precinct_20 |> 
@@ -142,6 +144,10 @@ library(lubridate)
 yadkin_voters <- read_csv("data/yadkin_voters.csv")
 ```
 
+```{r} 
+glimpse(yadkin_voters
+  )
+```
 ### Task 11: Look for date gaps in data
 
 **Task** Run the following codeblock to create a new column called "registration_month" that extracts the month and year from the "registr_dt" column. Group by the new "registration_month" column, count, and sort by "registration_month". How many registrations are there in the data for January 1900? What do you think the first 20 results suggests? Answer below. **Answer**
@@ -156,6 +162,13 @@ yadkin_voters |>
   ) |>
   arrange(registration_month)
 ```
+```{r} 
+yadkin_voters |>
+  filter(floor_date(registr_dt,"month")==mdy("01-01-1900"))
+
+
+```
+
 
 ### Task 14: Check for suspicious outliers
 
