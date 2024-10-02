@@ -82,24 +82,76 @@ md_senate_expenses_cleaned_by_purpose
 **Q2.** Let's do some research on the top purposes from A1. Feel free to search the Web to understand those terms better if need be, and then write a description comparing and contrasting the two campaigns' largest categories of spending.
 
 **A2.**
+```{r} 
+ md_senate_expenses_cleaned |>
+  group_by(candidate, purpose_clean) |>
+  summarise(contributions=n(),
+            amount = sum(amount)) |> 
+  arrange(desc(candidate))
 
+```
 **Q3.** Pick one of the top categories for each campaign and write code that shows how that spending has changed over time, if at all. You'll need to use lubridate for this. Write a couple of sentences describing that pattern.
 
 **A3.**
 
 ```{r}
 
+Advertising_cleaned_over <- md_senate_expenses_cleaned |>
+  mutate(date = ymd(date)) |>
+  filter(purpose_clean == "Advertising",
+         candidate == "Alsobrooks" ) |>
+  mutate(month_year = floor_date(date, unit = "month")) |>
+  group_by(month_year) |>
+  summarise(total_amount = sum(amount)) 
+  
 
+
+(Advertising_cleaned_over)
 ```
+```{r}
 
+Advertising_cleaned_over <- md_senate_expenses_cleaned |>
+  mutate(date = ymd(date)) |>
+  filter(purpose_clean == "Advertising",
+         candidate == "Hogan" ) |>
+  mutate(month_year = floor_date(date, unit = "month")) |>
+  group_by(month_year) |>
+  summarise(total_amount = sum(amount)) 
+  
+
+
+(Advertising_cleaned_over)
+```
 **Q4.** Which committee has the larger payroll or salary spending so far? How many unique recipients of payroll/staff spending are there for each candidate?
 
 **A4.**
 
 ```{r}
 
+ md_senate_expenses_cleaned |>
+ filter(candidate == "Alsobrooks",
+      purpose_clean == "Salary"
+        ) |>
+  group_by(last_name) |>
+  summarise(
+            amount = sum(amount)) 
+  
+
+```
+```{r}
+
+ md_senate_expenses_cleaned |>
+ filter(candidate == "Hogan",
+      purpose_clean == "Salary"
+        ) |>
+  group_by(last_name) |>
+  summarise(
+            amount = sum(amount)) 
+  
+
 ```
 
 **Q5** What's the most interesting story idea you've found in this data?
 
 **A5**
+Why the Contribution Refund	was so high (197189.02) 	
