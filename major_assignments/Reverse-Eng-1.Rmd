@@ -23,3 +23,65 @@ us_senate_expenses <- read_csv("senatedata.csv")
 
 
 ```
+```{r}
+
+glimpse(us_senate_expenses)
+colnames(us_senate_expenses)
+summary(us_senate_expenses)
+
+
+```
+
+```{r}
+#going through the people included in the article to see who recived the most compinsation. 
+us_senate_expenses |>
+filter(ORGANIZATION == "2024 HON. MATT GAETZ" | ORGANIZATION == "2024 HON. NANCY PELOSI" |ORGANIZATION == "2024 HON. NANCY MACE" ) |>
+group_by(ORGANIZATION) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+arrange(desc(TOTAL_AMOUNT))
+
+
+```
+```{r}
+#thought this would give me an accurate picture of who spent the most, but it included too many FISCAL YEAR totals. (to note the first Rep. to come up is 2024 SHRI THANEDAR)
+us_senate_expenses |>
+group_by(ORGANIZATION) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+arrange(desc(TOTAL_AMOUNT))
+
+
+
+```
+
+```{r} 
+#This is the total amount of spending for Bergman, however includes all the salaries of his staff. Question: Whats franked mail?
+us_senate_expenses |>
+  filter(ORGANIZATION == "2024 HON. JACK BERGMAN") |>
+group_by(ORGANIZATION) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+arrange(desc(TOTAL_AMOUNT))
+```
+```{r}
+us_senate_expenses |>
+  filter(ORGANIZATION == "2024 HON. JACK BERGMAN") |>
+  group_by(ORGANIZATION, DESCRIPTION) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+  arrange(desc(TOTAL_AMOUNT))
+```
+```{r}
+#Looking to see how much money JACK BERGMAN was reimbursed in 2023 and 2024. Not adding up to the total stated by the NYT article, "He was reimbursed more than $32,000 for lodging and nearly $12,000 for meals in 2023" This data says 29066.44 for lodging and 2766.37 for meals. 
+us_senate_expenses |>
+  filter(ORGANIZATION == "2024 HON. JACK BERGMAN" | ORGANIZATION == "2023 HON. JACK BERGMAN") |>
+  group_by(ORGANIZATION, DESCRIPTION) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+  arrange(desc(TOTAL_AMOUNT))
+```
+```{r}
+#Looking to see how much money Matt Gaetz was reimbursed in 2023 and 2024. Not adding up to the total stated by the NYT article, "$30,000 in lodging expenses and more than $11,000 for meals." This data says 9829.90 for lodging and 2674.18 for meals. 
+
+us_senate_expenses |>
+  filter(ORGANIZATION == "2024 HON. MATT GAETZ" | ORGANIZATION == "2023 HON. MATT GAETZ") |>
+  group_by(ORGANIZATION, DESCRIPTION) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+  arrange(desc(TOTAL_AMOUNT))
+```
