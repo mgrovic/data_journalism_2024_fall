@@ -82,17 +82,21 @@ md_senate_expenses_cleaned_by_purpose
 **Q2.** Let's do some research on the top purposes from A1. Feel free to search the Web to understand those terms better if need be, and then write a description comparing and contrasting the two campaigns' largest categories of spending.
 
 **A2.**
+Both campaigns main expense was advertising, as Alsobrooks had 14	contributions for $3639344.50 and Hogan had 21 contributions for 2178145.48 dollars. 
 ```{r} 
  md_senate_expenses_cleaned |>
   group_by(candidate, purpose_clean) |>
   summarise(contributions=n(),
-            amount = sum(amount)) |> 
-  arrange(desc(candidate))
+            amount = sum(amount)) |>
+  arrange(desc(amount))
+
 
 ```
 **Q3.** Pick one of the top categories for each campaign and write code that shows how that spending has changed over time, if at all. You'll need to use lubridate for this. Write a couple of sentences describing that pattern.
 
 **A3.**
+Alsobrooks' advertising spending steadily grew in the months up to April, where it peaked, than went back down. This is most likely due to an election that the campaign was preparing for. 
+Hogan's was the same, but peaked in May, a month later than the Alsobrooks campaign. 
 
 ```{r}
 
@@ -125,6 +129,8 @@ Advertising_cleaned_over <- md_senate_expenses_cleaned |>
 **Q4.** Which committee has the larger payroll or salary spending so far? How many unique recipients of payroll/staff spending are there for each candidate?
 
 **A4.**
+Alsobrooks has the larger staff payroll as Hogan's does not have any data show up. Alsobrooks' is 23 unique recipients and Hogan lists 0!
+
 
 ```{r}
 
