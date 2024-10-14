@@ -85,3 +85,21 @@ us_senate_expenses |>
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
   arrange(desc(TOTAL_AMOUNT))
 ```
+
+```{r}
+#Looking to see how much money Nancy Mace was reimbursed in 2023 and 2024. Not adding up to the total stated by the NYT article, "He was reimbursed more than $27,000 for lodging. 
+us_senate_expenses |>
+  filter(ORGANIZATION == "2024 HON. NANCY MACE" | ORGANIZATION == "2023 HON. NANCY MACE") |>
+  group_by(ORGANIZATION, DESCRIPTION) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+  arrange(desc(TOTAL_AMOUNT))
+```
+```{r}
+#The article says that the 
+ us_senate_expenses |>
+  filter(ORGANIZATION == "2024 HON. NANCY MACE" | ORGANIZATION == "2023 HON. NANCY MACE") |>
+  rename(START_DATE = `PERFORM START DT`) |>
+  group_by(ORGANIZATION, DESCRIPTION, START_DATE) |> 
+  summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
+  arrange(desc(START_DATE))
+```
