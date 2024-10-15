@@ -325,4 +325,4 @@ changes_by_county_combined_percent_change
 Q5. What's the best story idea or question you've seen as a result of the work you've done in this lab?
 
 A5.
-the overall trend in registered voter shows  a lot of changes in the number of Democrats, Republicans and Unaffiliated voters. Republicans seem to bexperience little change, Democrats seem to be going down slightly and Unaffliated voters seem to be shooting up. I would like to investigate why>
+the overall trend in registered voter shows  a lot of changes in the number of Democrats, Republicans and Unaffiliated voters. Republicans seem to bexperience little change, Democrats seem to be going down slightly and Unaffliated voters seem to be shooting up. I would like to investigate why. 

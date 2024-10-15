@@ -75,6 +75,7 @@ us_senate_expenses |>
   group_by(ORGANIZATION, DESCRIPTION) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
   arrange(desc(TOTAL_AMOUNT))
+
 ```
 ```{r}
 #Looking to see how much money Matt Gaetz was reimbursed in 2023 and 2024. Not adding up to the total stated by the NYT article, "$30,000 in lodging expenses and more than $11,000 for meals." This data says 9829.90 for lodging and 2674.18 for meals. 
