@@ -144,12 +144,19 @@ head(current_registrats_22)
 
 Q1. Calculate the percentage of registered Democrats, Republicans and unaffiliated voters for the entire state in September 2024 and September 2022, and then calculate the percentage change for those three party categories (the formula for percentage change is easy to remember: (New-Old)/Old). How would you describe the changes in these partisan categories in a story? What's the most interesting thing about these changes that would be the lede of that story?
 
+democrat_change: -3.027019
+republican_change: -0.6230212
+unaffiliated_change:	7.975611		
+
+I would describe these changes as little republican change, substantial democrat decrease and a huge boost in unaffiliated voters. The lede would be the reason for the almost 8% increase in Unaffiliated voters from 2022- 2024. 
+
+
 A1.
 
 ```{r}
 percent_party <-current_registrats |> 
   select(county, dem, rep, unaf, total) |>
-  filter(county == "TOTAL") |>
+
   mutate(percent_dem = dem/total*100) |>
   mutate(percent_rep = rep/total*100) |>
   mutate(percent_unaf = unaf/total*100)
@@ -159,7 +166,7 @@ percent_party
 ```{r}
 percent_party_22 <-current_registrats_22 |> 
   select(county, dem, rep, unaf, total) |>
-    filter(county == "TOTAL") |>
+
   mutate(percent_dem = dem/total*100) |>
   mutate(percent_rep = rep/total*100) |>
   mutate(percent_unaf = unaf/total*100)
@@ -169,17 +176,64 @@ percent_party_22
 ```
 ```{r}
 percent_party_combined <- percent_party |> 
-  full_join(percent_party_22) |>
-  filter( county == "TOTAL")
+  left_join(percent_party_22, join_by(county)) |>
+    rename(
+    dem24 = dem.x,
+    rep24 = rep.x,
+    unaf24 = unaf.x,
+    total24 = total.x,
+    percent_dem24 = percent_dem.x,
+    percent_rep24 = percent_rep.x,
+    percent_unaf24 = percent_unaf.x,
+    dem22 = dem.y,
+    rep22 = rep.y,
+    unaf22 = unaf.y,
+    total22 = total.y,
+    percent_dem22 = percent_dem.y,
+    percent_rep22 = percent_rep.y,
+    percent_unaf22 = percent_unaf.y
+  ) 
+   
+
+
 
 percent_party_combined
+```
+```{r}
+percent_party_changes <- percent_party_combined |>
+  mutate(
+    democrat_change = (percent_dem24 - percent_dem22) / percent_dem22 * 100,
+    republican_change = (percent_rep24 - percent_rep22) / percent_rep22 * 100,
+    unaffiliated_change = (percent_unaf24 - percent_unaf22) /percent_unaf22 * 100
+  ) |> 
+     filter(county == "TOTAL") |>
+  select(democrat_change, republican_change,  unaffiliated_change)
+
+percent_party_changes
 ```
 
 Q2. Among the Maryland jurisdictions with the most registered voters, which one had the biggest percentage increase in unaffiliated voters between 2022 and 2024? How did that county vote for governor in 2022 and for president in 2020? Contrast the partisan percentages of that county with the county that had the eighth-largest percentage increase in unaffiliated voters. You should display information from the data that shows the counties with the largest percentage increase first.
 
-A2.
 
+
+
+A2.
+PR. GEORGE'S county had 15.24% unaffiliated boost, the most of any county. They voted 89.3% Dem and 8.7% Rep in the 2020 Presidential Election and 89.23% Dem and 8.32% Rep in 2022 Governors election. 
+
+Howard County is the 8th largest percent in unaffiliated voters with 7.08%. They voted 70.7% Dem and 26.4% Rep in the 
+2020 Presidential Election and 69.87% Dem and 26.49%% Rep in 2022 Governors election. 
 ```{r}
+
+percent_party_changes <- percent_party_combined |>
+  mutate(
+    democrat_change = (percent_dem24 - percent_dem22) / percent_dem22 * 100,
+    republican_change = (percent_rep24 - percent_rep22) / percent_rep22 * 100,
+    unaffiliated_change = (percent_unaf24 - percent_unaf22) /percent_unaf22 * 100
+  ) |>
+  select(county, democrat_change, republican_change,  unaffiliated_change) |>
+  arrange(desc(unaffiliated_change))
+  
+percent_party_changes
 
 ```
 
@@ -188,19 +242,87 @@ Q3. Do the party percentages of new registrants (% Dem, % Rep, % Unaffiliated) f
 In other words, did new registrants mirror the overall partisan composition of the electorate, or were they different? Do any of the methods of registration vary significantly from the overall partisan pattern? Which method is worthy of further exploration?
 
 A3.
+OTHER MEANS	heavily favor unaffiliated (33.095663% increase) as does the ERIC Report (15.697845% increase)
+NVRA BY MAIL extremely favored new republican voters, with a 383.5164835% increase. 
+
+Overall, it seems that Democrats are going down slightly, republicans are slightly increasing and unaffiliated voters are mostly decreasing besides the stated outliers. 
 
 ```{r}
-
+party_registrats_pct_24 <- party_registrats |>
+  mutate(percent_dem24 = dem/total*100, 
+         percent_rep24 = rep/total*100,
+         percent_unaf24 = unaf/total*100,
+         ) 
+party_registrats_pct_24
+```
+```{r}
+party_registrats_pct_22 <- party_registrats_22 |>
+  mutate(percent_dem22 = dem/total*100, 
+         percent_rep22 = rep/total*100,
+         percent_unaf22 = unaf/total*100,
+         ) 
+party_registrats_pct_22 
 ```
 
+```{r}
+percent_party_registrats_combined <- party_registrats_pct_24 |> 
+  left_join(party_registrats_pct_22, join_by(registration_type))  |>
+select(percent_dem22, percent_rep22, percent_unaf22, percent_dem24, percent_rep24, percent_unaf24,registration_type )
+
+    percent_party_registrats_combined
+```
+```{r}
+
+percent_party_registrant_changes <- percent_party_registrats_combined |>
+  mutate(
+    democrat_change = (percent_dem24 - percent_dem22) / percent_dem22 * 100,
+    republican_change = (percent_rep24 - percent_rep22) / percent_rep22 * 100,
+    unaffiliated_change = (percent_unaf24 - percent_unaf22) / percent_unaf22 * 100
+  ) |>
+  select(registration_type, democrat_change, republican_change, unaffiliated_change) |>
+  arrange(desc(unaffiliated_change))
+  
+
+percent_party_registrant_changes
+```
 Q4. Choose your own adventure! Using both the 2024 and 2022 data for one of the dataframes (changes, removals or new registrations), ask and answer a question that makes at least one comparison and requires code to answer. That could involve calculating a percentage, percentage change or the raw difference between two columns.
 
 A4.
+I wanted to figure out the change in the number of people who changed names and addresses from 2022 till 2024 and what county had the most change. 
+I figured out GARRETT county had the most change in address and ALLEGANY had the most change in name. 
 
 ```{r}
 
+changes_by_county_combined <- changes_by_county |> 
+  left_join(changes_by_county_22, join_by(county))  |>
+  rename(
+    addresses_changed_24 = addresses_changed.x,
+    names_changed_24 = names_changed.x,
+     addresses_changed_22 = addresses_changed.y,
+    names_changed_22 = names_changed.y)
+
+
+ 
+changes_by_county_combined
+
+  
+```
+```{r}
+
+changes_by_county_combined_percent_change <- changes_by_county_combined |>
+  mutate(
+    address_change = ( addresses_changed_24 -  addresses_changed_22) /  addresses_changed_22 * 100,
+    name_change = (names_changed_24 - names_changed_22) / names_changed_22 * 100
+  ) |>
+  select(county, address_change, name_change) |>
+  arrange(desc(name_change))
+  
+
+changes_by_county_combined_percent_change
+```
 ```
 
 Q5. What's the best story idea or question you've seen as a result of the work you've done in this lab?
 
 A5.
+the overall trend in registered voter shows  a lot of changes in the number of Democrats, Republicans and Unaffiliated voters. Republicans seem to bexperience little change, Democrats seem to be going down slightly and Unaffliated voters seem to be shooting up. I would like to investigate why>
