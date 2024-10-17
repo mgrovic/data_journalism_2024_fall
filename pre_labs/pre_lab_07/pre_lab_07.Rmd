@@ -34,7 +34,7 @@ To use the API, you need to [an API key from the Census Bureau](https://api.cens
 **Task** Replace YOUR KEY HERE in the codeblock below with your Census API Key (leave the quotemarks).
 
 ```{r echo=FALSE}
-#census_api_key("YOUR KEY HERE", install=TRUE)
+census_api_key("03183f1d7157fca8529a26898cff8c1b802565ed", install=TRUE)
 ```
 
 The `install=TRUE` part saves your key for future use.
@@ -60,6 +60,8 @@ If you think that's crazy, try the SF3 file from 2000.
 
 ```{r}
 sf3 <- load_variables(2000, "sf3", cache = TRUE)
+
+head(sf3)
 ```
 
 ### Task 4: Calculate the fastest-growing state
