@@ -20,21 +20,42 @@ library(lubridate)
 ```{r}
 
 us_senate_expenses <- read_csv("senatedata.csv")
+us_senate_expenses_jan_mar<- read_csv("jan-marsod.csv")
+us_senate_expenses_apr_jun<- read_csv("apr-junsod.csv")
+us_senate_expenses_july_sep<- read_csv("jul-sepsod.csv")
+us_senate_expenses_oct_dec<- read_csv("oct-decsod.csv")
+
+
+
+```
+
+```{r}
+view(us_senate_expenses_jan_mar)
+view(us_senate_expenses_apr_jun)
+view(us_senate_expenses_july_sep)
+view(us_senate_expenses_oct_dec)
+
+
+
+
+
+
 
 
 ```
 ```{r}
-
-glimpse(us_senate_expenses)
-colnames(us_senate_expenses)
-summary(us_senate_expenses)
-
-
+us_senate_expenses_updated <- bind_rows(
+  us_senate_expenses_jan_mar,
+  us_senate_expenses_apr_jun,
+  us_senate_expenses_july_sep,
+  us_senate_expenses_oct_dec
+) |>
+ rename(budget_object_code = `BUDGET OBJECT CODE`)
 ```
 
 ```{r}
 #going through the people included in the article to see who recived the most compinsation. 
-us_senate_expenses |>
+us_senate_expenses_updated |>
 filter(ORGANIZATION == "2024 HON. MATT GAETZ" | ORGANIZATION == "2024 HON. NANCY PELOSI" |ORGANIZATION == "2024 HON. NANCY MACE" ) |>
 group_by(ORGANIZATION) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
@@ -44,7 +65,7 @@ arrange(desc(TOTAL_AMOUNT))
 ```
 ```{r}
 #thought this would give me an accurate picture of who spent the most, but it included too many FISCAL YEAR totals. (to note the first Rep. to come up is 2024 SHRI THANEDAR)
-us_senate_expenses |>
+us_senate_expenses_updated |>
 group_by(ORGANIZATION) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
 arrange(desc(TOTAL_AMOUNT))
@@ -55,14 +76,14 @@ arrange(desc(TOTAL_AMOUNT))
 
 ```{r} 
 #This is the total amount of spending for Bergman, however includes all the salaries of his staff. Question: Whats franked mail?
-us_senate_expenses |>
+us_senate_expenses_updated|>
   filter(ORGANIZATION == "2024 HON. JACK BERGMAN") |>
 group_by(ORGANIZATION) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
 arrange(desc(TOTAL_AMOUNT))
 ```
 ```{r}
-us_senate_expenses |>
+us_senate_expenses_updated |>
   filter(ORGANIZATION == "2024 HON. JACK BERGMAN") |>
   group_by(ORGANIZATION, DESCRIPTION) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
@@ -70,9 +91,9 @@ us_senate_expenses |>
 ```
 ```{r}
 #Looking to see how much money JACK BERGMAN was reimbursed in 2023 and 2024. Not adding up to the total stated by the NYT article, "He was reimbursed more than $32,000 for lodging and nearly $12,000 for meals in 2023" This data says 29066.44 for lodging and 2766.37 for meals. 
-us_senate_expenses |>
-  filter(ORGANIZATION == "2024 HON. JACK BERGMAN" | ORGANIZATION == "2023 HON. JACK BERGMAN") |>
-  group_by(ORGANIZATION, DESCRIPTION) |> 
+us_senate_expenses_updated |>
+  group_by(ORGANIZATION, DESCRIPTION, budget_object_code) |> 
+    filter(ORGANIZATION == "2023 HON. JACK BERGMAN" & budget_object_code == "2109") |>
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
   arrange(desc(TOTAL_AMOUNT))
 
@@ -80,8 +101,8 @@ us_senate_expenses |>
 ```{r}
 #Looking to see how much money Matt Gaetz was reimbursed in 2023 and 2024. Not adding up to the total stated by the NYT article, "$30,000 in lodging expenses and more than $11,000 for meals." This data says 9829.90 for lodging and 2674.18 for meals. 
 
-us_senate_expenses |>
-  filter(ORGANIZATION == "2024 HON. MATT GAETZ" | ORGANIZATION == "2023 HON. MATT GAETZ") |>
+us_senate_expenses_updated |>
+  filter(ORGANIZATION == "2023 HON. MATT GAETZ" & budget_object_code == "2107") |>
   group_by(ORGANIZATION, DESCRIPTION) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
   arrange(desc(TOTAL_AMOUNT))
@@ -89,16 +110,16 @@ us_senate_expenses |>
 
 ```{r}
 #Looking to see how much money Nancy Mace was reimbursed in 2023 and 2024. Not adding up to the total stated by the NYT article, "He was reimbursed more than $27,000 for lodging. 
-us_senate_expenses |>
-  filter(ORGANIZATION == "2024 HON. NANCY MACE" | ORGANIZATION == "2023 HON. NANCY MACE") |>
+us_senate_expenses_updated |>
+  filter(budget_object_code == "2107" & ORGANIZATION == "2023 HON. NANCY MACE") |>
   group_by(ORGANIZATION, DESCRIPTION) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
   arrange(desc(TOTAL_AMOUNT))
 ```
 ```{r}
 #The article says that the 
- us_senate_expenses |>
-  filter(ORGANIZATION == "2024 HON. NANCY MACE" | ORGANIZATION == "2023 HON. NANCY MACE") |>
+us_senate_expenses_updated |>
+  filter( ORGANIZATION == "2023 HON. NANCY MACE" & budget_object_code == "2107") |>
   rename(START_DATE = `PERFORM START DT`) |>
   group_by(ORGANIZATION, DESCRIPTION, START_DATE) |> 
   summarise(TOTAL_AMOUNT = sum(AMOUNT)) |>
