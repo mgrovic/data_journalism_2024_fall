@@ -112,6 +112,10 @@ Then export each dataframe using `write_csv` and make two (2) choropleth maps in
 Compare the two maps. What do you think are the most interesting story ideas in both, and what would you want to know more about? Put the answer below along with the URLs of your maps.
 
 **A3.** 
+ActBlue: https://datawrapper.dwcdn.net/B0Kpk/1/ 
+WinRed: https://datawrapper.dwcdn.net/Nwh2t/2/
+There are a couple big big, key difference between the two maps however they look quite similar. The total amount donated is 10x higher on the ActBlue map than the WinRed map. Although both maps have total donations concentrated in 5 or 6 zipcodes around dc, the WinRed donations are much more spread out. The big story here is why the money is so concentrated in those counties. Obviously it is because the is a larger population, but other zipcodes have a way higher proportional population to the number of votes they have. 
+
 
 ```{r}
 winred_zip_total <- read_csv("data/md_winred_zip_totals.csv") 
@@ -144,7 +148,9 @@ md_zip_actblue_pop <- md_zip_population |>
   left_join(actblue_zip_total, by = "zip") |>
    arrange(desc(donations)) |>
  filter(!is.na(donations)) |>
-  select(zip, estimate, donations, total)
+  select(zip, estimate, donations, total) |>
+mutate(donations_per_1000 = (donations / estimate) * 1000) |>
+  arrange(desc(total))
 
 write_csv(md_zip_actblue_pop,"md_actblue_zip_totals.csv")
 
@@ -158,8 +164,9 @@ md_zip_winred_pop <- md_zip_population |>
   left_join(winred_zip_total, by = "zip") |>
    arrange(desc(donations)) |>
  filter(!is.na(donations)) |>
-  select(zip, estimate, donations, total)
-
+  select(zip, estimate, donations, total) |>
+mutate(donations_per_1000 = (donations / estimate) * 1000) |>
+arrange(desc(total))
 write_csv(md_zip_winred_pop,"md_winred_zip_totals.csv")
 
 
