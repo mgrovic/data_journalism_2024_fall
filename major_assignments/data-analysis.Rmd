@@ -18,6 +18,7 @@ library(tidycensus)
 ```
 
 ```{r}
+#loads in the core data sets needed, as well as some more specific, cleaned data focusing on county leve data
 
 county_2024 <- read_csv("data/earlyvote_county_24.csv")
 county_2020 <- read_csv("data/earlyvote_county_20.csv")
@@ -27,9 +28,12 @@ early_voting_16 <- read_csv("data/2016_EarlyVoting_RAW_data.csv")
 early_voting_20 <-read_csv("data/2020_EarlyVoting_RAW_data.csv")
 early_voting_24 <- read_csv("data/2024_EarlyVoting_RAW_data.csv")
 
-
-county_2016
-
-
 ```
+
+2016 data has 104,046 rows and 19 columns
+2020 data has 209,983 rows and 19 columns 
+2024 data has 160,472 rows and 19 columns
+
+In terms of time frame, we have access to the General Election data from 2016, 2020 and 2024, which will allow us to explore the change in early voting over different election cycles. Because we have access to different time frames of data, there aren't any looming limits for the data. Some of our questions reference demographics, (ie "How do economic factors like household income and unemployment rates impact early voter voter turnout across Maryland counties?" and "Are certain counties or demographic groups turning out in higher numbers for early voting compared to previous elections?") and the data set does include some demographic data, including gender, political party affiliation and age group, we do lack other common demographics such as race, household income and unemployment rates. What we may have to do is locate that demographic data from individual counties and compare it to the early voting data we have now. 
+
 
