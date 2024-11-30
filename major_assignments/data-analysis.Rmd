@@ -133,4 +133,18 @@ q_3_final <-
 
 ```
 
+#Question 1: What is the percentage change of early voters from an election prior to covid (or 2020) to after covid? 
+
+#Answer: This is quite similar to question three. You can look at the percent change for each county, but here is the total percent change 
+
+```{r}
+total_percent_changes <- q_3_final |>
+  summarise(
+   avg_change_24_20 = mean(percent_change_24_20, na.rm = TRUE),
+    avg_change_24_16 = mean(percent_change_24_16, na.rm = TRUE),
+    avg_change_20_16 = mean(percent_change_20_16, na.rm = TRUE)
+  )
+
+total_percent_changes
+```
 
