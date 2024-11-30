@@ -12,9 +12,14 @@ options(scipen=999)
 # Load the tidyverse. If you have not installed the tidyverse already, remove the # from the next line and run it first.  
 # install.packages('tidyverse')
 library(tidyverse)
+library(tidytext)
 library(janitor)
 library(lubridate)
 library(tidycensus)
+```
+
+```{r echo=FALSE}
+census_api_key("03183f1d7157fca8529a26898cff8c1b802565ed", overwrite=TRUE)
 ```
 
 ```{r}
@@ -148,3 +153,47 @@ total_percent_changes <- q_3_final |>
 total_percent_changes
 ```
 
+#Question 5 
+#How do economic factors like household income and unemployment rates impact early voter turnout across Maryland counties? 
+
+```{r}
+
+ md_data <- get_acs(
+  geography = "county",
+  variables = c(
+    unemployment = "B23025_005",
+    labor_force = "B23025_003",
+    median_income = "B19013_001"
+  ),
+  state = "MD",
+  year = 2022,
+  geometry = FALSE
+) |>
+rename(county_name = NAME) |>
+
+ mutate(
+    # Clean up county names by removing " County, Maryland"
+    county_name = gsub(" County, Maryland", "", county_name),
+    # Rename Baltimore to Baltimore County
+    county_name = gsub("^Baltimore$", "Baltimore County", county_name),
+    # Rename "Baltimore city, Maryland" to "Baltimore City"
+    county_name = gsub("Baltimore city, Maryland", "Baltimore City", county_name)
+  )
+  
+#i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
+  
+
+
+
+  
+
+md_data
+  
+```
+```{r}
+q_5_final <- md_data |> 
+  left_join(county_2024, by = "county_name") |>
+group_by(variable)
+
+q_5_final
+```
