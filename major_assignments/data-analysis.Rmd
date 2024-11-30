@@ -26,7 +26,9 @@ county_2016 <- read_csv("data/earlyvote_county_16.csv")
 
 early_voting_16 <- read_csv("data/2016_EarlyVoting_RAW_data.csv")
 early_voting_20 <-read_csv("data/2020_EarlyVoting_RAW_data.csv")
-early_voting_24 <- read_csv("data/2024_EarlyVoting_RAW_data.csv")
+early_voting_2024 <- read_csv("data/2024_EarlyVoting_RAW_data.csv")
+
+party_24 <- read_csv("data/earlyvoting_party.csv")
 
 ```
 
@@ -35,5 +37,97 @@ early_voting_24 <- read_csv("data/2024_EarlyVoting_RAW_data.csv")
 2024 data has 160,472 rows and 19 columns
 
 In terms of time frame, we have access to the General Election data from 2016, 2020 and 2024, which will allow us to explore the change in early voting over different election cycles. Because we have access to different time frames of data, there aren't any looming limits for the data. Some of our questions reference demographics, (ie "How do economic factors like household income and unemployment rates impact early voter voter turnout across Maryland counties?" and "Are certain counties or demographic groups turning out in higher numbers for early voting compared to previous elections?") and the data set does include some demographic data, including gender, political party affiliation and age group, we do lack other common demographics such as race, household income and unemployment rates. What we may have to do is locate that demographic data from individual counties and compare it to the early voting data we have now. 
+
+#Question 4: 
+#How does early voting turnout correlate with registered party affiliation across Maryland counties? 
+
+```{r}
+early_voting_2024 |>
+  clean_names() |>  
+  group_by(county_name) |>
+  summarise(
+    total_voters = n(),
+    dem = sum(party_code == "DEM", na.rm = TRUE),
+    rep = sum(party_code == "REP", na.rm = TRUE),
+    oth = sum(party_code == "OTH", na.rm = TRUE),
+    una = sum(party_code == "UNA", na.rm = TRUE),
+    lib = sum(party_code == "LIB", na.rm = TRUE)
+  ) |>
+  mutate(
+    percent_dem = (dem / total_voters) * 100,
+    percent_rep = rep / total_voters * 100
+  ) |> 
+  arrange(desc(percent_dem))
+
+
+      
+    
+
+    
+
+ 
+
+
+```
+
+
+
+
+
+
+#Question 3: 
+#Are certain counties turning out in higher numbers for early voting compared to previous elections? 
+
+
+#A
+```{r}
+#For each year, I cleaned the data, made the percent total number a DBL and renamed the percent total to its respective year. I selected only the county and the total percent of eligible voters who voter early. For this question, the total number of voters on any given day was not needed. 
+county_2024 <- 
+  county_2024 |> 
+  clean_names() |> 
+  select(county_name, percent_total) |> 
+  mutate(percent_total = as.numeric(str_replace(percent_total, "%", ""))) |> 
+  rename(percent_total_24 = percent_total) |> 
+  arrange(desc(percent_total_24))
+
+county_2020_clean <- 
+  county_2020 |> 
+  clean_names() |> 
+  select(county, percent_total) |> 
+  mutate(percent_total = as.numeric(str_replace(percent_total, "%", ""))) |> 
+  rename(percent_total_20 = percent_total, county_name = county) |> 
+  arrange(desc(percent_total_20))
+
+county_2016 <- 
+  county_2016 |> 
+  clean_names() |> 
+  select(county_name, percent_total) |> 
+  mutate(percent_total = as.numeric(str_replace(percent_total, "%", ""))) |> 
+  rename(percent_total_16 = percent_total) |> 
+  arrange(desc(percent_total_16))
+
+# next I combined the three datasets into one, called Question three final. 
+q_3_final <- county_2024 |> 
+  left_join(county_2020_clean, by = "county_name") |> 
+  left_join(county_2016, by = "county_name")
+
+#here I create three new columns to show the three different possible percent changes. (16 to 20, 16 to 24 and 20 to 24.)
+q_3_final <-
+  q_3_final |>
+  mutate( 
+    percent_change_24_20 = ((percent_total_24 - percent_total_20) / percent_total_20) * 100) |>
+  mutate( 
+    percent_change_24_16 =  ((percent_total_24 - percent_total_16) / percent_total_16) * 100) |>
+  mutate( 
+    percent_change_20_16 =  ((percent_total_20 - percent_total_16) / percent_total_16) * 100) |>
+  arrange(desc(percent_change_24_16))
+  
+  
+  q_3_final
+  
+  # this final table, depending on how you arrange, will answer question  3. From 2020 to 2024 there are two counties experiencing a major increase of the total percent of eligible voters who voted early. Calvert (nearly 60% change) and Washington (40% change). Washington County is quite interesting, as it has the highest net increase, as from 2016 to 2024, it's percentage of early voters increase by almost exactly 100%. 
+
+
+```
 
 
