@@ -43,6 +43,14 @@ party_24 <- read_csv("data/earlyvoting_party.csv")
 
 In terms of time frame, we have access to the General Election data from 2016, 2020 and 2024, which will allow us to explore the change in early voting over different election cycles. Because we have access to different time frames of data, there aren't any looming limits for the data. Some of our questions reference demographics, (ie "How do economic factors like household income and unemployment rates impact early voter voter turnout across Maryland counties?" and "Are certain counties or demographic groups turning out in higher numbers for early voting compared to previous elections?") and the data set does include some demographic data, including gender, political party affiliation and age group, we do lack other common demographics such as race, household income and unemployment rates. What we may have to do is locate that demographic data from individual counties and compare it to the early voting data we have now. 
 
+#Most newsworhty thing about the data so far.
+Change in early voting from 2020 to 2024: -7.504786 %
+Change in early voting from 2016 to 2020: 44.98002 %
+Change in early voting from 2016 to 2024: 27.02911 %
+
+There was an obvious jump in early voting from 2016 to 2020, I assume due to the pandemic. However I assumed that early voting levels would level back out to 2016 numbers, but it seems that they remain high, with a 27% increase from 2016 to 2024 and only a 7.5% decrease from 2020. 
+
+
 #Question 4: 
 #How does early voting turnout correlate with registered party affiliation across Maryland counties? 
 
@@ -154,11 +162,11 @@ total_percent_changes
 ```
 
 #Question 5 
-#How do economic factors like household income and unemployment rates impact early voter turnout across Maryland counties? 
+#How do economic factors like median income and unemployment rates impact early voter turnout across Maryland counties? 
 
 ```{r}
 
- md_data <- get_acs(
+md_data <- get_acs(
   geography = "county",
   variables = c(
     unemployment = "B23025_005",
@@ -169,31 +177,48 @@ total_percent_changes
   year = 2022,
   geometry = FALSE
 ) |>
-rename(county_name = NAME) |>
-
- mutate(
+  rename(county_name = NAME) |>
+  
+  mutate(
     # Clean up county names by removing " County, Maryland"
     county_name = gsub(" County, Maryland", "", county_name),
-    # Rename Baltimore to Baltimore County
+    # Rename 'Baltimore' to 'Baltimore County'
     county_name = gsub("^Baltimore$", "Baltimore County", county_name),
-    # Rename "Baltimore city, Maryland" to "Baltimore City"
+    # Rename 'Baltimore city, Maryland' to 'Baltimore City'
     county_name = gsub("Baltimore city, Maryland", "Baltimore City", county_name)
-  )
+  ) |>
   
+  group_by(GEOID, county_name, variable) %>%
+  summarise(
+    estimate = first(estimate),  
+    .groups = 'drop'  
+  ) |>
+  pivot_wider(
+    names_from = variable,    
+    values_from = estimate,    
+    values_fill = list(estimate = NA)  
+  ) |>
+  
+  mutate(
+    unemployment_rate = (unemployment/labor_force) * 100
+  ) |>
+  select(county_name, unemployment_rate, median_income)|> 
+  
+  arrange(county_name)
+
+ 
 #i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
   
 
-
-
+md_data
   
 
-md_data
   
 ```
 ```{r}
 q_5_final <- md_data |> 
   left_join(county_2024, by = "county_name") |>
-group_by(variable)
+  arrange(unemployment_rate)
 
 q_5_final
 ```
