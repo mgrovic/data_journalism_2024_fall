@@ -43,9 +43,9 @@ In terms of time frame, we have access to the General Election data from 2016, 2
 
 ```{r}
 early_voting_2024 |>
-  clean_names() |>  
-  group_by(county_name) |>
-  summarise(
+  clean_names() |>  #clean data 
+  group_by(county_name) |> # more than 200,000 rows of data (as this data set originally had each early voting location as its own individual data point.) Now only 24 rows.
+   summarise(
     total_voters = n(),
     dem = sum(party_code == "DEM", na.rm = TRUE),
     rep = sum(party_code == "REP", na.rm = TRUE),
@@ -53,10 +53,13 @@ early_voting_2024 |>
     una = sum(party_code == "UNA", na.rm = TRUE),
     lib = sum(party_code == "LIB", na.rm = TRUE)
   ) |>
+  
+  #there was a column called "party_code" which either had a DEM, REP, OTH etc, to signify political party. to make my own columns, i summarized to create the new columns, which just have the total number of early voters by political party. 
   mutate(
     percent_dem = (dem / total_voters) * 100,
     percent_rep = rep / total_voters * 100
   ) |> 
+  #made new columns to show what percent of the early voters in each county were Dem and which percent were Rep. Honestly not a very significant trend to me here. The counties that tend to lean red seem to have a higher percentage of Rep early voters and vice-versa. 
   arrange(desc(percent_dem))
 
 
