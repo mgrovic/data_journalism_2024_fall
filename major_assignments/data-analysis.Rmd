@@ -50,6 +50,10 @@ Change in early voting from 2016 to 2024: 27.02911 %
 
 There was an obvious jump in early voting from 2016 to 2020, I assume due to the pandemic. However I assumed that early voting levels would level back out to 2016 numbers, but it seems that they remain high, with a 27% increase from 2016 to 2024 and only a 7.5% decrease from 2020. 
 
+Also the three counties with the highest percentage of early voters, all fell in the top 5 for lowest unemployment rate 
+#2 Talbot	Unemploymet: 3.173432		early voter: 32.80	
+#3Calvert	Unemploymet 3.180552		early voter 33.65	
+#5 Queen Anne's	Unemploymet 3.633084		early voter 33.87	
 
 #Question 4: 
 #How does early voting turnout correlate with registered party affiliation across Maryland counties? 
