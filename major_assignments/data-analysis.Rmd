@@ -24,7 +24,7 @@ census_api_key("03183f1d7157fca8529a26898cff8c1b802565ed", overwrite=TRUE)
 
 ```{r}
 #loads in the core data sets needed, as well as some more specific, cleaned data focusing on county leve data
-
+county_2024_2  <- read_csv("data/earlyvote_county_24.csv")
 county_2024 <- read_csv("data/earlyvote_county_24.csv")
 county_2020 <- read_csv("data/earlyvote_county_20.csv")
 county_2016 <- read_csv("data/earlyvote_county_16.csv")
@@ -192,7 +192,7 @@ md_data <- get_acs(
     county_name = gsub("Baltimore city, Maryland", "Baltimore City", county_name)
   ) |>
   
-  group_by(GEOID, county_name, variable) %>%
+  group_by(GEOID, county_name, variable) |>
   summarise(
     estimate = first(estimate),  
     .groups = 'drop'  
@@ -226,3 +226,86 @@ q_5_final <- md_data |>
 
 q_5_final
 ```
+
+#Question 2: What is the relationship between the proportion of eligible voters and early voter turnout in recent elections, and how do demographics explain differences across counties?
+
+#Answer 2: Counties with more eligible voters tend to have higher early voting turnout. Demographics like income, unemployment, and party affiliation also explain differences between counties.
+
+
+```{r}
+md_data_2 <- get_acs(
+  geography = "county",
+  variables = c(
+    total_pop_over_25 = "B15003_001" ,
+    no_school = "B15003_002" ,
+    highschool = "B15003_017",
+    bachelor = "B15003_021",
+    masters = "B15003_023" , 
+    pro_school_degree = "B15003_024" , 
+    doctorate = "B15003_025"
+  ),
+  state = "MD",
+  year = 2022,
+  geometry = FALSE
+) |>
+  rename(county_name = NAME) |>
+  
+  mutate(
+    # Clean up county names by removing " County, Maryland"
+    county_name = gsub(" County, Maryland", "", county_name),
+    # Rename 'Baltimore' to 'Baltimore County'
+    county_name = gsub("^Baltimore$", "Baltimore County", county_name),
+    # Rename 'Baltimore city, Maryland' to 'Baltimore City'
+    county_name = gsub("Baltimore city, Maryland", "Baltimore City", county_name)
+  ) |>
+  
+  group_by(GEOID, county_name, variable) |>
+  summarise(
+    estimate = first(estimate),  
+    .groups = 'drop'  
+  ) |>
+  pivot_wider(
+    names_from = variable,    
+    values_from = estimate,    
+    values_fill = list(estimate = NA)  
+  ) |>
+  mutate(
+    bachelor_pct = (bachelor/total_pop_over_25) *100
+  ) |>
+   mutate(
+    doctorate_pct = (doctorate/total_pop_over_25) *100
+  ) |>
+   mutate(
+    highschool_pct = (highschool/total_pop_over_25) *100
+  ) |>
+   mutate(
+    masters_pct = (masters/total_pop_over_25) *100
+  ) |>
+   mutate(
+    pro_school_degree_pct = (pro_school_degree/total_pop_over_25) *100
+  ) |>
+ 
+   mutate(
+    no_school_pct = (no_school/total_pop_over_25) *100 ) |>
+  
+  select(no_school_pct, pro_school_degree_pct, masters_pct, highschool_pct, doctorate_pct, bachelor_pct, no_school_pct, GEOID, county_name)
+  
+  
+  
+
+ 
+#i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
+  
+
+md_data
+
+```
+```{r}
+q_2_final <- md_data_2 |> 
+  left_join(county_2024, by = "county_name") |>
+  select(-GEOID) |>
+  arrange(desc(percent_total_24))
+
+q_2_final
+```
+
