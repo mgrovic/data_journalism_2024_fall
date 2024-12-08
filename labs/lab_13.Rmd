@@ -134,11 +134,14 @@ ut_elect_18_20
 **Q1.** Calculate the difference in votes between Evan McMullin and Jenny Wilson and save it your combined dataframe. Write up some sentences that could go in a story describing where McMullin outperformed Wilson and where he didn't. Mention the margins and describe the counties you mention (location, population or another factor, such as 2020 presidential vote).
 
 **A1.** 
+It seems that Evan McMullin dominated Jenny Wilson. McMullin won Utah county, Salt Lake county and Davis County (the three biggest counties in the state) and only lost one out of the 29 counties in the state (San Juan). Although Salt Lake is the biggest county in the state, McMullin had a larger difference in votes than Wilson in Utah County. McMullin won by 43,382 votes in Utah County. 
 
 ```{r}
 ut_elect_18_20 <- ut_elect_18_20 |>
   mutate(mcmullin_wilson_diff=clean_Evan_McMullin-Jenny_Wilson_DEM
-)
+) |>
+  arrange(desc(mcmullin_wilson_diff))
+
 
 ut_elect_18_20
 ```
@@ -146,10 +149,11 @@ ut_elect_18_20
 **Q2** Calculate the difference in votes between Mike Lee and Mitt Romney and save it your combined dataframe. Write up some sentences that could go in a story describing where Romney outperformed Lee and where he didn't. Mention the margins and describe the counties you mention (location, population or another factor).
 
 **A2** 
-
+in counties such as Salt Lake, Davis and Utah, Republican candidate Mitt Romney dominated. This is reflective of the overall popular vote as these are the three biggest counties in the state. Utah voted 59.4% in favor of Republican Presidential Candidate Donald Trump. However unlike the presidential election, Mitt Romney overwhelmingly won Salt Lake county, while in the latest presidential election, the county voted 54% democratic. 
 ```{r}
 ut_elect_18_20 <- ut_elect_18_20 |>
-  mutate(lee_romney_diff=clean_Mike_Lee-Mitt_Romney_REP)
+  mutate(lee_romney_diff=clean_Mike_Lee-Mitt_Romney_REP) |>
+  arrange(desc(lee_romney_diff))
 
 ut_elect_18_20
 ```
@@ -165,7 +169,32 @@ When you're done, rename the columns so they make sense, then make sure the date
 Finally, tell me what questions you could ask of this data. Be creative.
 
 **A3** 
+What are the most common topics covered in Sen. Ben Cardin's press releases?
+Do press releases correspond with key political events or issues?
 
 ```{r}
+ben_press_url <- "https://www.cardin.senate.gov/?post_type=press-releases"
 
+ben_press_releases <- ben_press_url |>
+  read_html() |>
+  html_elements('h3 a')
+
+dates <- ben_press_url |>
+  read_html() |>
+  html_elements('h5 a')
+  
+ben_release_name <- tibble( 
+  name = headlines |> html_text(),
+  url = headlines |> html_attr("href"), 
+  ) 
+  
+ben_release_date <- tibble(
+  date=mdy(html_text(dates))
+)
+  
+  
+ben_press_releases_final <- ben_release_name |>
+  bind_rows(ben_release_date)
+
+ben_press_releases_final
 ```
