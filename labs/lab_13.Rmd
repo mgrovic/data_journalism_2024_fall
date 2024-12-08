@@ -1,0 +1,171 @@
+---
+title: "lab_12"
+author: "derek willis"
+date: "11/25/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## You will need
+
+* Our usual libraries for working with data, plus rvest and possibly readxl for reading Excel files.
+
+## Load libraries and establish settings
+
+**Task** Create a codeblock and load appropriate packages and settings for this lab.
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+library(readxl)
+library(tidyverse)
+library(janitor)
+library(rvest)
+library(lubridate)
+library(readxl)
+```
+
+## Getting the Data
+
+We're continuing our contrasting of the 2022 and 2018 elections, but this time we're switching to a different state: Utah. Utah had an unusual Senate election in 2022: Democrats did not nominate a candidate to run against incumbent Republican Mike Lee and instead endorsed an independent, Evan McMullin, in the race. Broadly, we want to dig into the differences between the 2022 Senate results and the 2018 Senate race, when Republican Mitt Romney defeated Democrat Jenny Wilson.
+
+Let's start with the 2022 results. You'll need to locate and scrape the 2022 county-level results for the U.S. Senate race from the Utah Elections site (https://electionresults.utah.gov/elections/). Utah has 29 counties, so if you don't have at least 29 rows in your dataframe, you've scraped the wrong page.
+
+**Task** Scrape the county-level results for the U.S. Senate race in 2022, which can be found at https://electionresults.utah.gov/elections/, into a dataframe. You will need to make sure that you have clean headers, which may involve renaming them, and you will need to remove the total row. Make sure that the columns containing votes are numeric.
+
+```{r}
+ut_elec_2022 <- read_csv("2022_election_utah.csv")
+
+ut_elec_2022 <- data.frame(
+  x1 = c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA),
+  x2 = c(NA, "Beaver County", "Box Elder County", "Cache County", "Carbon County", "Daggett County", 
+         "Davis County", "Duchesne County", "Emery County", "Garfield County", "Grand County", "Iron County", "Juab County", 
+             "Kane County", "Millard County", "Morgan County", "Piute County", 
+             "Rich County", "Salt Lake County", "San Juan County", "Sanpete County", 
+             "Sevier County", "Summit County", "Tooele County", "Uintah County", 
+             "Utah County", "Wasatch County", "Washington County", "Wayne County", 
+             "Weber County"),
+  u_s_senate = c("EVAN MCMULLIN (UNA)", "419", "4725", "15580", "2114", "109", "52806", "912", "712", "520", "2421", "3755", "714", "946", "701", "1358", "82", "206", "218495", "1815", "1912", "1152", "12325", "7487", "1559", "72238", "5429", "17786", "415", "31265"),
+  x4 = c("JAMES ARTHUR HANSEN (LIB)", "33", "463", "1228", "230", "4", "2897", "96", "70", "33", "250", "437", "70", "104", "88", "79", "6", "14", "13902", "338", "150", "120", "553", "809", "203", "4949", "350", "1526", "26", "2756"),
+  x5 = c("MIKE LEE (REP)", "1971", "14434", "24588", "4265", "377", "66385", "5170", "3269", "1795", "1901", "12923", "3886", "2553", "4279", "3665", "692", "844", "144931", "3118", "7829", "6411", "7305", "13371", "8905", "127096", "7528", "49420", "1056", "42007"),
+  x6 = c("TOMMY WILLIAMS (IAP)", "24", "276", "586", "119", "8", "1654", "103", "56", "37", "71", "194", "61", "56", "62", "55", "3", "9", "3780", "289", "113", "92", "171", "402", "166", "1762", "157", "769", "17", "1011"),
+  x7 = c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA)
+  )
+
+colnames(ut_elec_2022) <- c("Unused1", "County", "Evan_McMullin", "James_Hansen", 
+                          "Mike_Lee", "Tommy_Williams", "Unused2")
+ut_elec_2022 <- ut_elec_2022 |>
+  filter(!is.na(County), !County %in% c("NA", "Total"))  
+
+ut_elec_2022 <- ut_elec_2022 |>
+  mutate(across(Evan_McMullin:Tommy_Williams, ~ as.numeric(.), .names = "clean_{col}"))
+
+ut_elec_2022 <- ut_elec_2022 |>
+  select(-Unused1, -Unused2, -Evan_McMullin, -James_Hansen, -Mike_Lee, -Tommy_Williams) 
+
+ut_elec_2022$County <- gsub(" County", "", ut_elec_2022$County)
+
+
+print(ut_elec_2022)
+
+```
+
+
+Next, we'll get the 2018 results. Unlike the 2022 results, these are stored in an Excel file located here: https://elections.utah.gov/Media/Default/2018%20Election/2018%20General%20Election%20Canvass.xlsx. You can choose how to get the U.S. Senate results - whether you download and save the file in this lab_13 folder (we did this in pre_lab_12) or whether you download it manually and create a CSV file from the Senate results sheet in this directory. Like the 2022 results, you'll want to make a dataframe with clean headers, no total row and numeric columns for the votes.
+
+**Task** Get the county-level results for the U.S. Senate race in 2018, which can be found at https://elections.utah.gov/Media/Default/2018%20Election/2018%20General%20Election%20Canvass.xlsx, and turn them into a dataframe. You will need to make sure that you have clean headers, which may involve renaming them, and you will need to remove the total row. Make sure that the columns containing votes are numeric.
+
+```{r}
+ut_elec_2018 <- read_excel("2018-General-Election-Canvass-1.xlsx", sheet = 2)
+
+ut_elec_2018 <- tibble(
+  County = c("Beaver", "Box Elder", "Cache", "Carbon", "Daggett", "Davis", "Duchesne", "Emery", "Garfield", 
+             "Grand", "Iron", "Juab", "Kane", "Millard", "Morgan", "Piute", "Rich", "Salt Lake", "San Juan", 
+             "Sanpete", "Sevier", "Summit", "Tooele", "Uintah", "Utah", "Wasatch", "Washington", "Wayne", "Weber"),
+  Tim_Aalders_CON = c(138, 718, 1250, 237, 11, 3005, 490, 88, 71, 96, 866, 210, 109, 284, 178, 62, 33, 6759, 139, 
+                      418, 408, 289, 992, 711, 5097, 272, 3352, 48, 2443),
+  Craig_R_Bowden_LIB = c(45, 533, 1106, 168, 7, 3232, 112, 73, 36, 110, 597, 80, 89, 90, 124, 21, 24, 9854, 127, 
+                         133, 173, 383, 726, 306, 4635, 222, 1885, 25, 2691),
+  Reed_C_McCandless_IAP = c(30, 269, 345, 217, 6, 1952, 76, 169, 19, 59, 206, 52, 38, 55, 49, 8, 5, 4265, 97, 
+                            195, 113, 139, 338, 158, 1739, 101, 911, 17, 1080),
+  Jenny_Wilson_DEM = c(298, 2603, 8854, 1879, 80, 29249, 569, 509, 388, 2138, 2846, 492, 746, 512, 600, 77, 124, 
+                       186856, 2096, 1139, 771, 10229, 5491, 1135, 28856, 3467, 11757, 267, 24513),
+  Mitt_Romney_REP = c(1620, 14803, 28344, 4387, 335, 86840, 4522, 3033, 1626, 1935, 11286, 3320, 2135, 3672, 4144, 
+                      524, 911, 207719, 2934, 7367, 5810, 9170, 14407, 7946, 135240, 8126, 42602, 999, 49458),
+  Glade_G_Fitzgerald_Write_in = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 
+                                  0, 0, 0, 0, 0),
+  Caleb_Dan_Reeve_Write_in = c(0, 1, 2, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 1, 0, 1, 0, 
+                               0, 0, 1, 6),
+  Hektor_Reiksthegn_Write_in = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 
+                                 0, 0, 0, 0, 0),
+  Abe_Korb_Write_in = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                       0, 0, 0),
+  Ryan_Daniel_Jackson_Write_in = c(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 
+                                   0, 0, 0, 0, 0),
+  Cody_Judy_Write_in = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                        0, 0, 0),
+  Tyrone_Jensen_Write_in = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 
+                            0, 0, 1, 0, 0)
+)
+
+print(ut_elec_2018)
+
+```
+
+Finally, join the two dataframes together:
+
+**Task** Join the 2022 and 2018 results into a single dataframe.
+
+```{r}
+ut_elect_18_20 <- ut_elec_2022 |> 
+  right_join(ut_elec_2018, by = "County") |>
+  select(-Glade_G_Fitzgerald_Write_in, -Caleb_Dan_Reeve_Write_in, -Hektor_Reiksthegn_Write_in, -Abe_Korb_Write_in, -Ryan_Daniel_Jackson_Write_in, -Cody_Judy_Write_in, -Tyrone_Jensen_Write_in) 
+  clean_names(ut_elect_18_20)
+ut_elect_18_20
+
+```
+
+## Questions
+
+**Q1.** Calculate the difference in votes between Evan McMullin and Jenny Wilson and save it your combined dataframe. Write up some sentences that could go in a story describing where McMullin outperformed Wilson and where he didn't. Mention the margins and describe the counties you mention (location, population or another factor, such as 2020 presidential vote).
+
+**A1.** 
+
+```{r}
+ut_elect_18_20 <- ut_elect_18_20 |>
+  mutate(mcmullin_wilson_diff=clean_Evan_McMullin-Jenny_Wilson_DEM
+)
+
+ut_elect_18_20
+```
+
+**Q2** Calculate the difference in votes between Mike Lee and Mitt Romney and save it your combined dataframe. Write up some sentences that could go in a story describing where Romney outperformed Lee and where he didn't. Mention the margins and describe the counties you mention (location, population or another factor).
+
+**A2** 
+
+```{r}
+ut_elect_18_20 <- ut_elect_18_20 |>
+  mutate(lee_romney_diff=clean_Mike_Lee-Mitt_Romney_REP)
+
+ut_elect_18_20
+```
+
+**Q3** Sen. Ben Cardin, D-Maryland, has posted hundreds of press releases at https://www.cardin.senate.gov/?post_type=press-releases. It would be great to have all of them in a dataframe that has the following columns: date, title and url.
+
+To do this, you will need to scrape the page's html and save that to a variable, and separately use that variable to then extract the dates, titles and urls into separate dataframes using html_elements(). The function `html_text()` pulls out the contents of a tag, but for urls we want the HTML attribute. Rvest gives you a way to extract the URL from a link; google to find out what it is.
+
+At the end, you'll have three dataframes that you want to combine into a single dataframe. When we want to combine the rows of identical dataframes, we used `bind_rows()`. There's an alternative you can use to do the same for combining columns, and it works the same way.
+
+When you're done, rename the columns so they make sense, then make sure the date column is an actual date.
+
+Finally, tell me what questions you could ask of this data. Be creative.
+
+**A3** 
+
+```{r}
+
+```

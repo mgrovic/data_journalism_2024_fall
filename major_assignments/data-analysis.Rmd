@@ -23,7 +23,7 @@ census_api_key("03183f1d7157fca8529a26898cff8c1b802565ed", overwrite=TRUE)
 ```
 
 ```{r}
-#loads in the core data sets needed, as well as some more specific, cleaned data focusing on county leve data
+#loads in the core data sets needed, as well as some more specific, cleaned data focusing on county level data
 county_2024_2  <- read_csv("data/earlyvote_county_24.csv")
 county_2024 <- read_csv("data/earlyvote_county_24.csv")
 county_2020 <- read_csv("data/earlyvote_county_20.csv")
@@ -202,6 +202,8 @@ md_data <- get_acs(
     values_from = estimate,    
     values_fill = list(estimate = NA)  
   ) |>
+    #i asked chatgpt why this code wasn't running, and it told me to add this code, which rearranged columns and the data points in my column to more accurately identify the trends in the data set. 
+
   
   mutate(
     unemployment_rate = (unemployment/labor_force) * 100
@@ -229,7 +231,7 @@ q_5_final
 
 #Question 2: What is the relationship between the proportion of eligible voters and early voter turnout in recent elections, and how do demographics explain differences across counties?
 
-#Answer 2: Counties with more eligible voters tend to have higher early voting turnout. Demographics like income, unemployment, and party affiliation also explain differences between counties.
+#Answer 2: Counties with more eligible voters tend to have higher early voting turnout. Demographics like education don't explain the differences differences between countiesas much as expected.
 
 
 ```{r}
@@ -269,6 +271,7 @@ md_data_2 <- get_acs(
     values_from = estimate,    
     values_fill = list(estimate = NA)  
   ) |>
+  #i asked chatgpt why this code wasn't running, and it told me to add this code, which rearranged columns and the data points in my column to more accurately identify the trends in the data set. 
   mutate(
     bachelor_pct = (bachelor/total_pop_over_25) *100
   ) |>
@@ -288,7 +291,7 @@ md_data_2 <- get_acs(
    mutate(
     no_school_pct = (no_school/total_pop_over_25) *100 ) |>
   
-  select(no_school_pct, pro_school_degree_pct, masters_pct, highschool_pct, doctorate_pct, bachelor_pct, no_school_pct, GEOID, county_name)
+  select(GEOID, county_name, no_school_pct, pro_school_degree_pct, masters_pct, highschool_pct, doctorate_pct, bachelor_pct, no_school_pct)
   
   
   
@@ -297,13 +300,13 @@ md_data_2 <- get_acs(
 #i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
   
 
-md_data
+md_data_2
 
 ```
 ```{r}
 q_2_final <- md_data_2 |> 
   left_join(county_2024, by = "county_name") |>
-  select(-GEOID) |>
+  select(county_name, percent_total_24,no_school_pct, pro_school_degree_pct, masters_pct, highschool_pct, doctorate_pct, bachelor_pct, no_school_pct) |>
   arrange(desc(percent_total_24))
 
 q_2_final
