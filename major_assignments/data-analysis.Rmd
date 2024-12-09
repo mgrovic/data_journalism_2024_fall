@@ -52,11 +52,13 @@ There was an obvious jump in early voting from 2016 to 2020, I assume due to the
 
 Also the three counties with the highest percentage of early voters, all fell in the top 5 for lowest unemployment rate 
 #2 Talbot	Unemploymet: 3.173432		early voter: 32.80	
-#3Calvert	Unemploymet 3.180552		early voter 33.65	
+#3 Calvert	Unemploymet 3.180552		early voter 33.65	
 #5 Queen Anne's	Unemploymet 3.633084		early voter 33.87	
 
 #Question 4: 
 #How does early voting turnout correlate with registered party affiliation across Maryland counties? 
+
+Democratic counties have more Democratic early voters, while Republican counties have more Republican early voters, reflecting their political leanings. This shows that early voting turnout aligns with voter demographics. Overall, the data matches typical voting patterns. because Maryland is an overwhelmingly democratic state there are definitely a higher number of democratic early voters, just due to the politics of the state, 
 
 ```{r}
 early_voting_2024 |>
@@ -100,6 +102,8 @@ early_voting_2024 |>
 
 
 #A
+this final table, depending on how you arrange, will answer question  3. From 2020 to 2024 there are two counties experiencing a major increase of the total percent of eligible voters who voted early. Calvert (nearly 60% change) and Washington (40% change). Washington County is quite interesting, as it has the highest net increase, as from 2016 to 2024, it's percentage of early voters increase by almost exactly 100%. 
+
 ```{r}
 #For each year, I cleaned the data, made the percent total number a DBL and renamed the percent total to its respective year. I selected only the county and the total percent of eligible voters who voter early. For this question, the total number of voters on any given day was not needed. 
 county_2024 <- 
@@ -154,9 +158,13 @@ q_3_final <-
 
 #Answer: This is quite similar to question three. You can look at the percent change for each county, but here is the total percent change 
 
+ Early voting saw a 27% increase from 2016 to 2024, showing that the shift toward early voting during the pandemic has had a lasting impact. While turnout dipped slightly by 7.5% from 2020 to 2024, it still remained much higher than in 2016. This trend highlights how early voting has become a more popular option for many voters across the country.
+
+
 ```{r}
 total_percent_changes <- q_3_final |>
-  summarise(
+ #these summarise functions take the mean of the percent change for all the counties and find the average 
+   summarise(
    avg_change_24_20 = mean(percent_change_24_20, na.rm = TRUE),
     avg_change_24_16 = mean(percent_change_24_16, na.rm = TRUE),
     avg_change_20_16 = mean(percent_change_20_16, na.rm = TRUE)
@@ -167,12 +175,29 @@ total_percent_changes
 
 #Question 5 
 #How do economic factors like median income and unemployment rates impact early voter turnout across Maryland counties? 
+The three counties with the highest percentage of early voters, all fell in the top 5 for lowest unemployment rate: 
+
+2 Talbot	Unemployment: 3.173432	early voter: 32.80	
+3 Calvert	Unemployment 3.180552		early voter 33.65	
+5 Queen Anne's	Unemployment 3.633084	 early voter 33.87
+
+
+
+Baltimore City (58349 median income, 13.40% early voter turnout) and Allegheny County (55248 median income, 16.59% early voter turnout), are in the bottom four of counties in terms of median income, and are the two counties with the lowest early voter turn out. 
+
+
+
+
+
+ Counties with lower unemployment and higher incomes see more people turning out for early voting, showing that economic stability can make it easier for people to participate. When life is a little less stressful financially, it might be simpler to make time to vote early. This pattern shows how a community’s economic situation can influence voter turnout.
+
 
 ```{r}
-
+#in this question we ask how other demographic factors play in to early voting, so we need to use the census data. 
 md_data <- get_acs(
   geography = "county",
-  variables = c(
+ #each of these variable numbers corresponds with a census data set, so we need to call the right ones
+   variables = c(
     unemployment = "B23025_005",
     labor_force = "B23025_003",
     median_income = "B19013_001"
@@ -191,7 +216,8 @@ md_data <- get_acs(
     # Rename 'Baltimore city, Maryland' to 'Baltimore City'
     county_name = gsub("Baltimore city, Maryland", "Baltimore City", county_name)
   ) |>
-  
+  ##i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
+
   group_by(GEOID, county_name, variable) |>
   summarise(
     estimate = first(estimate),  
@@ -204,7 +230,7 @@ md_data <- get_acs(
   ) |>
     #i asked chatgpt why this code wasn't running, and it told me to add this code, which rearranged columns and the data points in my column to more accurately identify the trends in the data set. 
 
-  
+  #while I couldn't find a data set in the get_acs that showed unemployment rate, I did find total unemployment and labor force, which i then used to calculate unemployment rate.
   mutate(
     unemployment_rate = (unemployment/labor_force) * 100
   ) |>
@@ -213,7 +239,6 @@ md_data <- get_acs(
   arrange(county_name)
 
  
-#i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
   
 
 md_data
@@ -222,22 +247,27 @@ md_data
   
 ```
 ```{r}
+#i am joining the census data for unemployment rate and median income by county with percent total 24, which shows what percent of each county voted early. 
 q_5_final <- md_data |> 
   left_join(county_2024, by = "county_name") |>
-  arrange(unemployment_rate)
+  arrange(desc(unemployment_rate))
 
 q_5_final
 ```
 
 #Question 2: What is the relationship between the proportion of eligible voters and early voter turnout in recent elections, and how do demographics explain differences across counties?
 
-#Answer 2: Counties with more eligible voters tend to have higher early voting turnout. Demographics like education don't explain the differences differences between countiesas much as expected.
+#Answer 2: Counties with more eligible voters tend to have higher early voting turnout. Demographics like education don't explain the differences between counties as much as expected.
+
+There may (loose trend) be a loose trend where the lower the percentage of people with no school experience, the higher the early voter turnout, however there are definitively a few outliers. 
 
 
 ```{r}
 md_data_2 <- get_acs(
+  #in this question we ask how other demographic factors play in to early voting, so we need to use the census data. 
   geography = "county",
   variables = c(
+     #each of these variable numbers corresponds with a census data set, so we need to call the right ones
     total_pop_over_25 = "B15003_001" ,
     no_school = "B15003_002" ,
     highschool = "B15003_017",
@@ -260,7 +290,8 @@ md_data_2 <- get_acs(
     # Rename 'Baltimore city, Maryland' to 'Baltimore City'
     county_name = gsub("Baltimore city, Maryland", "Baltimore City", county_name)
   ) |>
-  
+  #i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
+
   group_by(GEOID, county_name, variable) |>
   summarise(
     estimate = first(estimate),  
@@ -291,13 +322,14 @@ md_data_2 <- get_acs(
    mutate(
     no_school_pct = (no_school/total_pop_over_25) *100 ) |>
   
+  #these mutate functions were meant to see what percentage of the total over 25 population in a county had a specific education. 
+  
   select(GEOID, county_name, no_school_pct, pro_school_degree_pct, masters_pct, highschool_pct, doctorate_pct, bachelor_pct, no_school_pct)
   
   
   
 
  
-#i used chatgpt for this mutate function. I was unsure how to fix all the names of the counties and keep Baltimore County and make Baltimore City correct so i asked how to change the county_names to fit the format so i could bind this data set to the early voting data set.   
   
 
 md_data_2
@@ -305,6 +337,7 @@ md_data_2
 ```
 ```{r}
 q_2_final <- md_data_2 |> 
+  #i am joining the census data for these different levels of education by county with percent total 24, which shows what percent of each county voted early. 
   left_join(county_2024, by = "county_name") |>
   select(county_name, percent_total_24,no_school_pct, pro_school_degree_pct, masters_pct, highschool_pct, doctorate_pct, bachelor_pct, no_school_pct) |>
   arrange(desc(percent_total_24))
