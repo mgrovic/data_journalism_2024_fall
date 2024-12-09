@@ -181,20 +181,19 @@ ben_press_releases <- ben_press_url |>
 
 dates <- ben_press_url |>
   read_html() |>
-  html_elements('h5 a')
-  
+  html_elements('h5') # Adjusted selector to match the structure of dates on the website
+
 ben_release_name <- tibble( 
-  name = headlines |> html_text(),
-  url = headlines |> html_attr("href"), 
-  ) 
-  
-ben_release_date <- tibble(
-  date=mdy(html_text(dates))
+  name = ben_press_releases |> html_text(),
+  url = ben_press_releases |> html_attr("href")
 )
-  
-  
+
+ben_release_date <- tibble(
+  date = dates |> html_text() |> mdy()
+)
+
 ben_press_releases_final <- ben_release_name |>
-  bind_rows(ben_release_date)
+  mutate(date = ben_release_date$date)
 
 ben_press_releases_final
 ```
