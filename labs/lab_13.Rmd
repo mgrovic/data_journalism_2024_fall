@@ -181,7 +181,7 @@ ben_press_releases <- ben_press_url |>
 
 dates <- ben_press_url |>
   read_html() |>
-  html_elements('h5') # Adjusted selector to match the structure of dates on the website
+  html_elements('h5') 
 
 ben_release_name <- tibble( 
   name = ben_press_releases |> html_text(),
